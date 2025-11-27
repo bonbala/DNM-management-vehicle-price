@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import Image from "next/image"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -322,7 +323,14 @@ export default function DashboardContent() {
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">DNM</h1>
+              {/* <h1 className="text-3xl font-bold text-foreground">DNM</h1> */}
+              <Image
+                src="/logo-DNM.png"
+                alt="DNM Logo"
+                width={160}
+                height={80}
+                priority
+              />
               <p className="text-sm text-muted-foreground mt-1">Hệ thống quản lý giá xe máy và ô tô</p>
             </div>
             <div className="flex gap-2 items-center">
@@ -348,7 +356,7 @@ export default function DashboardContent() {
                       Lịch Sử
                     </Button>
                   </Link>
-                  <Button variant="outline" onClick={logout} className="gap-2 bg-transparent">
+                  <Button variant="outline" onClick={logout} className="gap-2 bg-transparent hover:bg-red-500">
                     <LogOut size={18} />
                     Đăng xuất
                   </Button>

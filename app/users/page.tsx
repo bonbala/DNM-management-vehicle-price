@@ -176,7 +176,7 @@ export default function UsersManagementPage() {
                 <p className="text-muted-foreground">Đăng nhập với</p>
                 <p className="font-medium text-foreground">{user?.username}</p>
               </div>
-              <Button variant="outline" onClick={logout} className="gap-2">
+              <Button variant="outline" onClick={logout} className="gap-2 bg-transparent hover:bg-red-500 ">
                 <LogOut size={18} />
                 Đăng xuất
               </Button>

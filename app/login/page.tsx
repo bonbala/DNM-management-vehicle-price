@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -53,10 +54,14 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-lg">
         <div className="p-8">
           <div className="mb-8 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-lg mb-4">
-              <Lock className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">DNM</h1>
+            <Image
+              src="/logo-DNM.png"
+              alt="DNM Logo"
+              width={250}
+              height={100}
+              className="mx-auto mb-4"
+              priority
+            />
             <p className="text-sm text-muted-foreground mt-2">Đăng nhập để tiếp tục</p>
           </div>
 
