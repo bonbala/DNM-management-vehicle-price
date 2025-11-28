@@ -66,8 +66,8 @@ export default function VehicleTable({
               </th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Tên Xe</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Hãng</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Loại</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Năm</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Loại</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Dung Tích</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Giá Bán</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Hành Động</th>
@@ -90,8 +90,8 @@ export default function VehicleTable({
                 </td>
                 <td className="px-6 py-4 text-sm font-medium text-foreground">{vehicle.name}</td>
                 <td className="px-6 py-4 text-sm text-foreground">{vehicle.brand}</td>
-                <td className="px-6 py-4 text-sm text-foreground">{vehicle.type}</td>
                 <td className="px-6 py-4 text-sm text-foreground">{vehicle.year}</td>
+                <td className="px-6 py-4 text-sm text-foreground">{vehicle.type}</td>
                 <td className="px-6 py-4 text-sm text-foreground">{vehicle.engineCapacity}</td>
                 <td className={isAuthenticated ? "px-6 py-4 text-sm font-semibold text-foreground" : "px-6 py-4"}>
                   {isAuthenticated ? formatPrice(vehicle.salePrice) : (
