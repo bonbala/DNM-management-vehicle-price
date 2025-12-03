@@ -6,8 +6,10 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/components/auth-context"
-import { Plus, Edit2, Trash2, LogOut, ArrowLeft, Loader2 } from "lucide-react"
+import { Plus, Edit2, Trash2, LogOut, ArrowLeft, Loader2, Key } from "lucide-react"
 import type { User, UserRole } from "@/types/user"
+import { EditUserModal } from "@/components/edit-user-modal"
+import { ResetPasswordModal } from "@/components/reset-password-modal"
 
 export default function UsersManagementPage() {
   const router = useRouter()
@@ -16,6 +18,9 @@ export default function UsersManagementPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null)
+  const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     username: "",
     staffName: "",
@@ -35,11 +40,8 @@ export default function UsersManagementPage() {
     const loadUsers = async () => {
       try {
         setIsLoading(true)
-        const token = localStorage.getItem("token")
         const response = await fetch("/api/users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include", // Include cookies
         })
 
         if (!response.ok) {
@@ -66,11 +68,10 @@ export default function UsersManagementPage() {
         return
       }
 
-      const token = localStorage.getItem("token")
       const response = await fetch("/api/users", {
         method: "POST",
+        credentials: "include", // Include cookies
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
@@ -91,42 +92,15 @@ export default function UsersManagementPage() {
     }
   }
 
-  const handleUpdateRole = async (userId: string, newRole: UserRole) => {
-    try {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`/api/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ role: newRole }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Lỗi khi cập nhật role")
-      }
-
-      const updated = await response.json()
-      setUsers(users.map((u) => (u.id === userId ? updated : u)))
-      alert("Cập nhật role thành công")
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "Lỗi khi cập nhật role")
-    }
-  }
-
   const handleDeleteUser = async (userId: string) => {
     if (!confirm("Bạn có chắc chắn muốn xóa tài khoản này?")) {
       return
     }
 
     try {
-      const token = localStorage.getItem("token")
       const response = await fetch(`/api/users/${userId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       })
 
       if (!response.ok) {
@@ -137,6 +111,59 @@ export default function UsersManagementPage() {
       alert("Xóa tài khoản thành công")
     } catch (error) {
       alert(error instanceof Error ? error.message : "Lỗi khi xóa tài khoản")
+    }
+  }
+
+  const handleEditUserSave = async (updates: { staffName: string; role: UserRole }) => {
+    if (!editingUser) return
+
+    try {
+      const response = await fetch(`/api/users/${editingUser.id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updates),
+      })
+
+      if (!response.ok) {
+        throw new Error("Lỗi khi cập nhật tài khoản")
+      }
+
+      const updated = await response.json()
+      setUsers(users.map((u) => (u.id === editingUser.id ? updated : u)))
+      setEditModalOpen(false)
+      setEditingUser(null)
+      alert("Cập nhật tài khoản thành công")
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Lỗi khi cập nhật tài khoản")
+    }
+  }
+
+  const handleResetPassword = async (newPassword: string) => {
+    if (!resetPasswordUser) return
+
+    try {
+      const response = await fetch(`/api/users/${resetPasswordUser.id}/reset-password`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ newPassword }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Lỗi khi đặt lại mật khẩu")
+      }
+
+      setResetPasswordModalOpen(false)
+      setResetPasswordUser(null)
+      alert("Đặt lại mật khẩu thành công")
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Lỗi khi đặt lại mật khẩu")
     }
   }
 
@@ -270,7 +297,6 @@ export default function UsersManagementPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold">STT</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Tài khoản</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Tên Nhân Viên</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Role</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Ngày Tạo</th>
                   <th className="px-6 py-3 text-center text-sm font-semibold">Hành động</th>
                 </tr>
@@ -282,29 +308,48 @@ export default function UsersManagementPage() {
                     <td className="px-6 py-3 text-sm font-medium">{u.username}</td>
                     <td className="px-6 py-3 text-sm">{u.staffName}</td>
                     <td className="px-6 py-3 text-sm">
-                      <select
-                        value={u.role}
-                        onChange={(e) => handleUpdateRole(u.id, e.target.value as UserRole)}
-                        className="px-3 py-1 border border-border rounded-md bg-background text-sm"
-                      >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                        <option value="super_admin">Super Admin</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-3 text-sm">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString("vi-VN") : "-"}
                     </td>
                     <td className="px-6 py-3 text-center">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteUser(u.id)}
-                        className="gap-1"
-                      >
-                        <Trash2 size={16} />
-                        Xóa
-                      </Button>
+                      <div className="flex gap-2 justify-center">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingUser(u)
+                            setEditModalOpen(true)
+                          }}
+                          className="gap-1"
+                          title="Chỉnh sửa tài khoản"
+                        >
+                          <Edit2 size={16} />
+                          Sửa
+                        </Button>
+                        {(user?.role === "super_admin" || user?.role === "admin") && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setResetPasswordUser(u)
+                              setResetPasswordModalOpen(true)
+                            }}
+                            className="gap-1"
+                            title="Đặt lại mật khẩu"
+                          >
+                            <Key size={16} />
+                            Đặt lại MK
+                          </Button>
+                        )}
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteUser(u.id)}
+                          className="gap-1"
+                        >
+                          <Trash2 size={16} />
+                          Xóa
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -318,6 +363,27 @@ export default function UsersManagementPage() {
           )}
         </Card>
       </div>
+
+      {/* Modals */}
+      <EditUserModal
+        isOpen={editModalOpen}
+        user={editingUser}
+        onClose={() => {
+          setEditModalOpen(false)
+          setEditingUser(null)
+        }}
+        onSave={handleEditUserSave}
+      />
+
+      <ResetPasswordModal
+        isOpen={resetPasswordModalOpen}
+        user={resetPasswordUser}
+        onClose={() => {
+          setResetPasswordModalOpen(false)
+          setResetPasswordUser(null)
+        }}
+        onReset={handleResetPassword}
+      />
     </div>
   )
 }

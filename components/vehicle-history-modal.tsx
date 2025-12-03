@@ -20,7 +20,9 @@ export default function VehicleHistoryModal({ vehicleId, vehicleName, onClose }:
     const loadHistories = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch(`/api/histories/${vehicleId}`)
+        const response = await fetch(`/api/histories/${vehicleId}`, {
+          credentials: "include",
+        })
         if (!response.ok) {
           throw new Error("Lỗi khi tải lịch sử")
         }

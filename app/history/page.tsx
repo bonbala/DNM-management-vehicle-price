@@ -97,7 +97,9 @@ export default function HistoryPage() {
         if (filters.year) params.append("year", String(filters.year))
         if (filters.engineCapacity) params.append("engineCapacity", filters.engineCapacity)
 
-        const response = await fetch(`/api/histories/pagination?${params.toString()}`)
+        const response = await fetch(`/api/histories/pagination?${params.toString()}`, {
+          credentials: "include",
+        })
 
         if (!response.ok) {
           throw new Error("Lỗi khi tải lịch sử thay đổi")

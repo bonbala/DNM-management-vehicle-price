@@ -26,7 +26,5 @@ build/
 Thumbs.db
 .DS_Store
 
-# Markdown files
-AUTHENTICATION_GUIDE.md
-FIX_LOGIN_SUMMARY.md
-LOGIN_SETUP_GUIDE.md
+# Documentation (Analysis, guides, security reports)
+docs/

@@ -1,7 +1,7 @@
 import type { User, UserRole } from "@/types/user"
 import { getUsersCollection } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
-import crypto from "crypto"
+import bcryptjs from "bcryptjs"
 
 interface UserDocument {
   _id: ObjectId
@@ -14,9 +14,18 @@ interface UserDocument {
 }
 
 export class UserService {
-  // Hash password (simple implementation - use bcrypt in production)
-  private static hashPassword(password: string): string {
-    return crypto.createHash("sha256").update(password).digest("hex")
+  // Hash password using bcrypt (secure)
+  private static async hashPassword(password: string): Promise<string> {
+    const saltRounds = 12
+    return await bcryptjs.hash(password, saltRounds)
+  }
+
+  // Verify password against hash
+  private static async verifyPassword(
+    password: string,
+    hash: string
+  ): Promise<boolean> {
+    return await bcryptjs.compare(password, hash)
   }
 
   private static mapDocToUser(doc: UserDocument): User {
@@ -59,16 +68,18 @@ export class UserService {
     return this.mapDocToUser(user as UserDocument)
   }
 
-  static async authenticateUser(username: string, password: string): Promise<User | null> {
+  static async authenticateUser(
+    username: string,
+    password: string
+  ): Promise<User | null> {
     const collection = await getUsersCollection()
-    const hashedPassword = this.hashPassword(password)
 
-    const user = await collection.findOne({
-      username,
-      password: hashedPassword,
-    })
-
+    const user = await collection.findOne({ username })
     if (!user) return null
+
+    // Verify password against bcrypt hash
+    const isValid = await this.verifyPassword(password, user.password)
+    if (!isValid) return null
 
     return this.mapDocToUser(user as UserDocument)
   }
@@ -87,7 +98,7 @@ export class UserService {
       throw new Error("Tài khoản đã tồn tại")
     }
 
-    const hashedPassword = this.hashPassword(password)
+    const hashedPassword = await this.hashPassword(password)
     const now = new Date()
 
     const result = await collection.insertOne({
@@ -146,20 +157,29 @@ export class UserService {
     return this.updateUser(id, { role: newRole })
   }
 
-  static async changePassword(id: string, oldPassword: string, newPassword: string): Promise<boolean> {
+  static async changePassword(
+    id: string,
+    oldPassword: string,
+    newPassword: string
+  ): Promise<boolean> {
     try {
       if (!ObjectId.isValid(id)) {
         return false
       }
 
       const collection = await getUsersCollection()
-      const hashedOldPassword = this.hashPassword(oldPassword)
-      const hashedNewPassword = this.hashPassword(newPassword)
-
       const user = await collection.findOne({ _id: new ObjectId(id) })
-      if (!user || user.password !== hashedOldPassword) {
+      if (!user) {
         return false
       }
+
+      // Verify old password
+      const isValid = await this.verifyPassword(oldPassword, user.password)
+      if (!isValid) {
+        return false
+      }
+
+      const hashedNewPassword = await this.hashPassword(newPassword)
 
       await collection.updateOne(
         { _id: new ObjectId(id) },
@@ -174,6 +194,41 @@ export class UserService {
       return true
     } catch (error) {
       console.error("[v0] changePassword error:", error)
+      throw error
+    }
+  }
+
+  /**
+   * Reset password - Admin sets new password without verification of old password
+   */
+  static async resetPassword(id: string, newPassword: string): Promise<boolean> {
+    try {
+      if (!ObjectId.isValid(id)) {
+        console.error("[v0] Invalid ObjectId format:", id)
+        return false
+      }
+
+      const collection = await getUsersCollection()
+      const user = await collection.findOne({ _id: new ObjectId(id) })
+      if (!user) {
+        return false
+      }
+
+      const hashedNewPassword = await this.hashPassword(newPassword)
+
+      await collection.updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            password: hashedNewPassword,
+            updatedAt: new Date(),
+          },
+        },
+      )
+
+      return true
+    } catch (error) {
+      console.error("[v0] resetPassword error:", error)
       throw error
     }
   }

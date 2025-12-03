@@ -10,29 +10,14 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Alert } from "@/components/ui/alert"
 import { useAuth } from "@/components/auth-context"
-import { Lock , } from "lucide-react"
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [seedLoading, setSeedLoading] = useState(false)
   const router = useRouter()
   const { login } = useAuth()
-
-  const handleSeedData = async () => {
-    try {
-      setSeedLoading(true)
-      const response = await fetch("/api/auth/seed")
-      const data = await response.json()
-      alert(data.message || "Tạo tài khoản demo thành công")
-    } catch (error) {
-      alert("Lỗi khi tạo tài khoản demo")
-    } finally {
-      setSeedLoading(false)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

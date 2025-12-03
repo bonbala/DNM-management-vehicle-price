@@ -1,46 +1,42 @@
 import { type NextRequest, NextResponse } from "next/server"
 import type { UserRole } from "@/types/user"
+import { verifyAccessToken } from "@/lib/jwt-utils"
 
 export interface TokenPayload {
   userId: string
   username: string
   role: UserRole
+  iat?: number
+  exp?: number
 }
 
-// Parse token from base64 encoding (database-backed tokens only)
+// Parse and verify JWT access token from Authorization header or cookies
 export function parseToken(token: string): TokenPayload | null {
   try {
-    console.log("[v0] Attempting to parse token, first 20 chars:", token.substring(0, 20))
-    
-    // Validate token format - should be valid base64
-    if (!token || token.trim().length === 0) {
-      console.log("[v0] Token is empty")
+    // Handle null, undefined, or "null" string
+    if (!token || token === "null" || token.trim().length === 0) {
+      console.log("[v0] Token is empty or null")
       return null
     }
 
-    // Check if token looks like a valid base64 (only alphanumeric, +, /, =)
-    if (!/^[A-Za-z0-9+/]*={0,2}$/.test(token)) {
-      console.log("[v0] Token does not look like valid base64")
+    console.log("[v0] Attempting to parse JWT token, first 20 chars:", token.substring(0, 20))
+
+    // Verify JWT token
+    const payload = verifyAccessToken(token)
+
+    if (!payload) {
+      console.log("[v0] Token verification failed")
       return null
     }
 
-    // Parse as base64 (new format from login)
-    const decoded = Buffer.from(token, "base64").toString("utf-8")
-    
-    // Check if decoded string looks like JSON
-    if (!decoded.startsWith("{") || !decoded.endsWith("}")) {
-      console.log("[v0] Decoded token is not valid JSON format")
-      return null
-    }
-
-    const payload = JSON.parse(decoded)
-    
     if (payload.userId && payload.username && payload.role) {
       console.log("[v0] Token parsed successfully, userId:", payload.userId)
       return {
         userId: payload.userId,
         username: payload.username,
-        role: payload.role as UserRole,
+        role: payload.role,
+        iat: payload.iat,
+        exp: payload.exp,
       }
     }
 
@@ -56,16 +52,39 @@ export function requireAuth(
   request: NextRequest,
   allowedRoles?: UserRole[],
 ): { isValid: boolean; response?: NextResponse; user?: TokenPayload } {
+  // 1. Try to get token from Authorization header
+  let token: string | null = null
   const authHeader = request.headers.get("authorization")
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (authHeader?.startsWith("Bearer ")) {
+    token = authHeader.substring(7)
+    console.log("[v0] Token from Authorization header")
+  }
+
+  // 2. If no header token, try to get from cookies
+  if (!token) {
+    token = request.cookies.get("accessToken")?.value || null
+    if (token) {
+      console.log("[v0] Token from accessToken cookie")
+    }
+  }
+
+  // DEBUG: Log all cookies
+  const allCookies = request.cookies.getAll()
+  if (allCookies.length === 0) {
+    console.log("[v0] WARNING: No cookies received in request!")
+  } else {
+    console.log("[v0] Cookies received:", allCookies.map(c => c.name).join(", "))
+  }
+
+  if (!token) {
+    console.log("[v0] No token found in headers or cookies")
     return {
       isValid: false,
       response: NextResponse.json({ error: "Unauthorized - Vui lòng đăng nhập" }, { status: 401 }),
     }
   }
 
-  const token = authHeader.substring(7)
   const user = parseToken(token)
 
   if (!user) {
