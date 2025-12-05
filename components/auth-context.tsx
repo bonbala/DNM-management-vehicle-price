@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useRef } from "react"
 import type { User, AuthContext as AuthContextType, UserRole } from "@/types/user"
+import type { GeolocationCoordinates } from "@/types/audit-log"
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -67,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [scheduleTokenRefresh])
 
   const login = useCallback(
-    async (username: string, password: string) => {
+    async (username: string, password: string, geolocation: GeolocationCoordinates) => {
       try {
         // Call API to login
         const response = await fetch("/api/auth/login", {
@@ -76,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             "Content-Type": "application/json",
           },
           credentials: "include", // Include cookies
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ username, password, geolocation }),
         })
 
         if (!response.ok) {

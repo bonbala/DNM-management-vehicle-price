@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { UserService } from "@/lib/services/user-service"
+import { AuditLogService } from "@/lib/services/audit-log-service"
 import { generateAccessToken, generateRefreshToken, getAccessTokenExpiry, getRefreshTokenExpiry } from "@/lib/jwt-utils"
 import { checkRateLimit, getRemainingAttempts, getResetTime } from "@/lib/rate-limiter"
 import { cookies } from "next/headers"
@@ -37,6 +38,22 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       const remaining = getRemainingAttempts(identifier)
+      
+      // Create failed login audit log
+      try {
+        await AuditLogService.createLog({
+          userId: "unknown",
+          username: username,
+          action: "LOGIN_FAILED",
+          ipAddress: ip,
+          userAgent: request.headers.get("user-agent") || "",
+          failureReason: "Invalid credentials",
+          geolocation: body.geolocation,
+        })
+      } catch (auditError) {
+        console.error("[v0] Failed to create audit log:", auditError)
+      }
+      
       return NextResponse.json(
         {
           error: "Tài khoản hoặc mật khẩu không chính xác",
@@ -88,6 +105,20 @@ export async function POST(request: NextRequest) {
       path: "/",
       maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
     })
+
+    // Create successful login audit log
+    try {
+      await AuditLogService.createLog({
+        userId: user.id,
+        username: user.username,
+        action: "LOGIN_SUCCESS",
+        ipAddress: ip,
+        userAgent: request.headers.get("user-agent") || "",
+        geolocation: body.geolocation,
+      })
+    } catch (auditError) {
+      console.error("[v0] Failed to create audit log:", auditError)
+    }
 
     return response
   } catch (error) {

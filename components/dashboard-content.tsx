@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Search, ChevronLeft, ChevronRight, Trash2, Edit3, LogOut, Lock, Loader2, X } from "lucide-react"
+import { Plus, Search, ChevronLeft, ChevronRight, Trash2, Edit3, LogOut, Lock, Loader2, X, Download } from "lucide-react"
 import { useAuth } from "@/components/auth-context"
 import VehicleForm from "@/components/vehicle-form"
 import VehicleTable from "@/components/vehicle-table"
@@ -14,6 +14,7 @@ import BulkAddForm from "@/components/bulk-add-form"
 import BulkEditForm from "@/components/bulk-edit-form"
 import VehicleHistoryModal from "@/components/vehicle-history-modal"
 import { VehicleAPI } from "@/lib/api-client"
+import { exportVehiclesWithDateRange, exportAllVehiclesToExcel } from "@/lib/export-excel"
 import type { Vehicle } from "@/types/vehicle"
 import Link from "next/link"
 
@@ -22,6 +23,7 @@ export default function DashboardContent() {
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [totalPages, setTotalPages] = useState(1)
@@ -356,6 +358,13 @@ export default function DashboardContent() {
                       Lịch Sử
                     </Button>
                   </Link>
+                  {canAccess(["super_admin"]) && (
+                    <Link href="/audit-logs">
+                      <Button variant="outline" className="gap-2">
+                        Audit Logs
+                      </Button>
+                    </Link>
+                  )}
                   <Button variant="outline" onClick={logout} className="gap-2 bg-transparent hover:bg-red-500">
                     <LogOut size={18} />
                     Đăng xuất
@@ -403,6 +412,44 @@ export default function DashboardContent() {
                 <Plus size={18} />
                 Thêm Nhiều
               </Button>
+              {canAccess(["super_admin"]) && (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (vehicles.length === 0) {
+                        alert("Không có xe để xuất")
+                        return
+                      }
+                      exportVehiclesWithDateRange(vehicles)
+                    }}
+                    className="gap-2"
+                    title="Xuất danh sách xe hiện tại sang Excel"
+                  >
+                    <Download size={18} />
+                    Xuất Excel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        setIsExporting(true)
+                        await exportAllVehiclesToExcel()
+                      } catch (error) {
+                        alert(error instanceof Error ? error.message : "Lỗi khi xuất Excel")
+                      } finally {
+                        setIsExporting(false)
+                      }
+                    }}
+                    disabled={isExporting}
+                    className="gap-2"
+                    title="Xuất toàn bộ danh sách xe từ database"
+                  >
+                    <Download size={18} />
+                    {isExporting ? "Đang xuất..." : "Xuất Hết"}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

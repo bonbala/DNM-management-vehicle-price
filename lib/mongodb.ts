@@ -36,3 +36,8 @@ export async function getHistoriesCollection() {
   const { db } = await connectToDatabase()
   return db.collection("histories")
 }
+
+export async function getAuditLogsCollection() {
+  const { db } = await connectToDatabase()
+  return db.collection("audit_logs")
+}

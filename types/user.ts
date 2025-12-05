@@ -9,10 +9,12 @@ export interface User {
   updatedAt?: Date
 }
 
+import type { GeolocationCoordinates } from "./audit-log"
+
 export interface AuthContext {
   user: User | null
   isAuthenticated: boolean
-  login: (username: string, password: string) => Promise<void>
+  login: (username: string, password: string, geolocation: GeolocationCoordinates) => Promise<void>
   logout: () => void
   canAccess: (requiredRoles: UserRole[]) => boolean
 }

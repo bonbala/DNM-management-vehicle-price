@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Alert } from "@/components/ui/alert"
 import { useAuth } from "@/components/auth-context"
+import { requestGeolocation, GeolocationError } from "@/lib/geolocation-helper"
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
@@ -25,7 +26,22 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      await login(username, password)
+      // Request geolocation permission (required)
+      let geolocation
+      try {
+        geolocation = await requestGeolocation()
+      } catch (geoError) {
+        // Geolocation permission denied or error
+        const errorMessage = geoError instanceof GeolocationError 
+          ? geoError.message 
+          : "Lỗi xác định vị trí"
+        
+        setError("Đăng nhập thất bại, yêu cầu cấp quyền truy cập location")
+        setIsLoading(false)
+        return
+      }
+
+      await login(username, password, geolocation)
       router.push("/")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Đăng nhập thất bại")
