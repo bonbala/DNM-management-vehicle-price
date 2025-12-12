@@ -7,6 +7,8 @@ interface HistoryDocument {
   vehicleId: string
   oldPrice: number
   newPrice: number
+  oldBuyPrice: number
+  newBuyPrice: number
   userId: string
   createdAt: Date
 }
@@ -18,6 +20,8 @@ export class HistoryService {
       vehicleId: doc.vehicleId,
       oldPrice: doc.oldPrice,
       newPrice: doc.newPrice,
+      oldBuyPrice: doc.oldBuyPrice,
+      newBuyPrice: doc.newBuyPrice,
       userId: doc.userId,
       createdAt: doc.createdAt,
     }
@@ -28,6 +32,8 @@ export class HistoryService {
     oldPrice: number,
     newPrice: number,
     userId: string,
+    oldBuyPrice: number = 0,
+    newBuyPrice: number = 0,
   ): Promise<History> {
     const collection = await getHistoriesCollection()
     const now = new Date()
@@ -36,6 +42,8 @@ export class HistoryService {
       vehicleId,
       oldPrice,
       newPrice,
+      oldBuyPrice,
+      newBuyPrice,
       userId,
       createdAt: now,
     })
@@ -45,6 +53,8 @@ export class HistoryService {
       vehicleId,
       oldPrice,
       newPrice,
+      oldBuyPrice,
+      newBuyPrice,
       userId,
       createdAt: now,
     }
@@ -158,6 +168,8 @@ export class HistoryService {
       engineCapacity: doc.vehicle.engineCapacity,
       oldPrice: doc.oldPrice,
       newPrice: doc.newPrice,
+      oldBuyPrice: doc.oldBuyPrice || 0,
+      newBuyPrice: doc.newBuyPrice || 0,
       staffName: doc.user.staffName,
       createdAt: doc.createdAt,
     }))
@@ -187,6 +199,8 @@ export class HistoryService {
       engineCapacity: doc.vehicle.engineCapacity,
       oldPrice: doc.oldPrice,
       newPrice: doc.newPrice,
+      oldBuyPrice: doc.oldBuyPrice || 0,
+      newBuyPrice: doc.newBuyPrice || 0,
       staffName: doc.user.staffName,
       createdAt: doc.createdAt,
     }))
@@ -228,6 +242,8 @@ export class HistoryService {
       engineCapacity: doc.vehicle.engineCapacity,
       oldPrice: doc.oldPrice,
       newPrice: doc.newPrice,
+      oldBuyPrice: doc.oldBuyPrice || 0,
+      newBuyPrice: doc.newBuyPrice || 0,
       staffName: doc.user.staffName,
       createdAt: doc.createdAt,
     }))

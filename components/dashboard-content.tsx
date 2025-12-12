@@ -23,6 +23,7 @@ export default function DashboardContent() {
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isTableLoading, setIsTableLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [limit, setLimit] = useState(10)
@@ -47,7 +48,7 @@ export default function DashboardContent() {
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Debounce search term - delay API call by 500ms after user stops typing
+  // Debounce search term - delay API call by 1000ms after user stops typing
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current)
@@ -56,7 +57,7 @@ export default function DashboardContent() {
     searchTimeoutRef.current = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm)
       setCurrentPage(1)
-    }, 500)
+    }, 1000)
 
     return () => {
       if (searchTimeoutRef.current) {
@@ -65,13 +66,13 @@ export default function DashboardContent() {
     }
   }, [searchTerm])
 
-  // Load data with pagination, filters, and sorting
+  // Initial load - show full page loading
   useEffect(() => {
     const loadVehicles = async () => {
       try {
         setIsLoading(true)
         const result = await VehicleAPI.getVehiclesPagination({
-          page: currentPage,
+          page: 1,
           limit,
           brand: filters.brand || undefined,
           type: filters.type || undefined,
@@ -91,6 +92,36 @@ export default function DashboardContent() {
     }
 
     loadVehicles()
+  }, []) // Only run on mount
+
+  // Load data on search/filter/sort changes - show table loading spinner only
+  useEffect(() => {
+    const loadVehicles = async () => {
+      try {
+        setIsTableLoading(true)
+        const result = await VehicleAPI.getVehiclesPagination({
+          page: currentPage,
+          limit,
+          brand: filters.brand || undefined,
+          type: filters.type || undefined,
+          year: filters.year ? String(filters.year) : undefined,
+          engineCapacity: filters.engineCapacity || undefined,
+          sortBy,
+          search: debouncedSearchTerm || undefined,
+        })
+        setVehicles(result.data)
+        setTotal(result.total)
+        setTotalPages(result.totalPages)
+      } catch (error) {
+        console.error("[v0] Failed to load vehicles:", error)
+      } finally {
+        setIsTableLoading(false)
+      }
+    }
+
+    if (debouncedSearchTerm !== "" || filters.brand || filters.type || filters.year || filters.engineCapacity || sortBy !== "default") {
+      loadVehicles()
+    }
   }, [currentPage, limit, filters, sortBy, debouncedSearchTerm])
 
   // Maintain focus on search input after any search action (typing, clearing, loading)
@@ -98,7 +129,7 @@ export default function DashboardContent() {
     if (searchInputRef.current) {
       searchInputRef.current.focus()
     }
-  }, [isLoading, debouncedSearchTerm, searchTerm])
+  }, [searchTerm])
 
   const [distinctBrands] = useState<string[]>([
     "Honda",
@@ -514,18 +545,28 @@ export default function DashboardContent() {
             Tổng cộng: {total} kết quả
           </div>
 
-          <VehicleTable
-            vehicles={vehicles}
-            selectedIds={selectedIds}
-            onSelectAll={handleSelectAll}
-            onSelectVehicle={handleSelectVehicle}
-            onEdit={handleEditVehicle}
-            onDelete={handleDeleteVehicle}
-            onViewHistory={handleViewHistory}
-            isAuthenticated={isAuthenticated}
-            canEdit={canAccess(["admin", "super_admin"])}
-            userRole={user?.role}
-          />
+          <div className="relative">
+            {isTableLoading && (
+              <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10 rounded-lg">
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 size={24} className="animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Đang tải...</p>
+                </div>
+              </div>
+            )}
+            <VehicleTable
+              vehicles={vehicles}
+              selectedIds={selectedIds}
+              onSelectAll={handleSelectAll}
+              onSelectVehicle={handleSelectVehicle}
+              onEdit={handleEditVehicle}
+              onDelete={handleDeleteVehicle}
+              onViewHistory={handleViewHistory}
+              isAuthenticated={isAuthenticated}
+              canEdit={canAccess(["admin", "super_admin"])}
+              userRole={user?.role}
+            />
+          </div>
 
           {/* Pagination Controls */}
           <div className="flex items-center justify-between pt-6 gap-4">

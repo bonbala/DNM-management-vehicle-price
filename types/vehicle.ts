@@ -6,4 +6,5 @@ export interface Vehicle {
   year: number
   engineCapacity: string
   salePrice: number
+  buyPrice: number
 }

@@ -7,8 +7,19 @@ import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
   try {
-    // Get IP for rate limiting
-    const ip = request.ip || request.headers.get("x-forwarded-for") || "unknown"
+    // Get IP address - try multiple sources
+    let ip = request.headers.get("x-forwarded-for") || ""
+    
+    // Try x-real-ip header (alternative)
+    if (!ip) {
+      ip = request.headers.get("x-real-ip") || ""
+    }
+    
+    // Fallback
+    if (!ip) {
+      ip = "localhost"
+    }
+    
     const identifier = `login:${ip}`
 
     // Check rate limit

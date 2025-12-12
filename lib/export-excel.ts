@@ -37,7 +37,7 @@ export async function exportVehiclesToExcel(
   const titleCell = worksheet.getCell("A1")
   titleCell.font = { bold: true, size: 14, color: { argb: "FF000000" } }
   titleCell.alignment = { horizontal: "center", vertical: "middle" }
-  worksheet.mergeCells("A1:F1")
+  worksheet.mergeCells("A1:G1")
   worksheet.getRow(1).height = 25
 
   // Add empty row
@@ -50,7 +50,8 @@ export async function exportVehiclesToExcel(
     "Hãng",
     "Loại",
     "Dung Tích",
-    "Giá Bán",
+    "Giá Thị Trường",
+    "Giá Thu",
   ])
 
   // Style header row
@@ -84,12 +85,18 @@ export async function exportVehiclesToExcel(
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
       }).format(vehicle.salePrice),
+      new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(vehicle.buyPrice),
     ])
 
     // Center align all cells except price (align right)
     row.eachCell((cell, colNumber) => {
       cell.alignment = {
-        horizontal: colNumber === 6 ? "right" : "center",
+        horizontal: colNumber === 6 || colNumber === 7 ? "right" : "center",
         vertical: "middle",
       }
       cell.border = {
@@ -108,7 +115,8 @@ export async function exportVehiclesToExcel(
     { width: 15 }, // Hãng
     { width: 15 }, // Loại
     { width: 15 }, // Dung Tích
-    { width: 20 }, // Giá Bán
+    { width: 20 }, // Giá Thị Trường
+    { width: 20 }, // Giá Thu
   ]
 
   // Generate filename with current date

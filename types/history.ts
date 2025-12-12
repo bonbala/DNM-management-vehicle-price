@@ -3,6 +3,8 @@ export interface History {
   vehicleId: string
   oldPrice: number
   newPrice: number
+  oldBuyPrice: number
+  newBuyPrice: number
   userId: string
   createdAt?: Date
 }
@@ -17,6 +19,8 @@ export interface HistoryDisplay {
   engineCapacity: string
   oldPrice: number
   newPrice: number
+  oldBuyPrice: number
+  newBuyPrice: number
   staffName: string
   createdAt: Date
 }

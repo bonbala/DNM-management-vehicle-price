@@ -33,6 +33,7 @@ export default function VehicleForm({
     year: vehicle?.year || new Date().getFullYear(),
     engineCapacity: vehicle?.engineCapacity || "",
     salePrice: vehicle?.salePrice || 0,
+    buyPrice: vehicle?.buyPrice || 0,
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -146,13 +147,25 @@ export default function VehicleForm({
           </div>
 
           {/* Prices Row */}
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Giá Bán (VNĐ) *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Giá Thị Trường (VNĐ) *</label>
               <Input
                 type="number"
                 name="salePrice"
                 value={formData.salePrice}
+                onChange={handleChange}
+                placeholder="0"
+                min={0}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Giá Thu (VNĐ) *</label>
+              <Input
+                type="number"
+                name="buyPrice"
+                value={formData.buyPrice}
                 onChange={handleChange}
                 placeholder="0"
                 min={0}

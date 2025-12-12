@@ -47,6 +47,7 @@ export default function BulkEditForm({
           "type",
           "year",
           "engineCapacity",
+          "buyPrice",
           "salePrice",
         ]
 
@@ -102,7 +103,10 @@ export default function BulkEditForm({
                   Dung Tích
                 </th>
                 <th className="border border-border px-4 py-3 text-left text-sm font-semibold text-foreground min-w-40">
-                  Giá Bán
+                  Giá Thị Trường
+                </th>
+                <th className="border border-border px-4 py-3 text-left text-sm font-semibold text-foreground min-w-40">
+                  Giá Thu
                 </th>
               </tr>
             </thead>
@@ -177,6 +181,15 @@ export default function BulkEditForm({
                       placeholder="0"
                       value={vehicle.salePrice}
                       onChange={(e) => handleChange(index, "salePrice", Number.parseInt(e.target.value) || 0)}
+                      className="border-0 p-0 bg-transparent"
+                    />
+                  </td>
+                  <td className="border border-border px-4 py-3">
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={vehicle.buyPrice}
+                      onChange={(e) => handleChange(index, "buyPrice", Number.parseInt(e.target.value) || 0)}
                       className="border-0 p-0 bg-transparent"
                     />
                   </td>

@@ -37,6 +37,8 @@ export default function HistoryPage() {
     type: false,
     year: true,
     engineCapacity: false,
+    oldBuyPrice: true,
+    newBuyPrice: true,
     oldPrice: true,
     newPrice: true,
     change: true,
@@ -197,6 +199,8 @@ export default function HistoryPage() {
     type: "Loại",
     year: "Năm",
     engineCapacity: "Dung Tích",
+    oldBuyPrice: "Giá Thu Cũ",
+    newBuyPrice: "Giá Thu Mới",
     oldPrice: "Giá Cũ",
     newPrice: "Giá Mới",
     change: "Thay Đổi",
@@ -431,13 +435,31 @@ export default function HistoryPage() {
                       Dung Tích
                     </th>
                   )}
+                  {visibleColumns.oldBuyPrice && (
+                    <th
+                      className="px-6 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-muted/80"
+                      onClick={() => toggleColumnVisibility("oldBuyPrice")}
+                      title="Click để ẩn"
+                    >
+                      Giá Thu Cũ
+                    </th>
+                  )}
+                  {visibleColumns.newBuyPrice && (
+                    <th
+                      className="px-6 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-muted/80"
+                      onClick={() => toggleColumnVisibility("newBuyPrice")}
+                      title="Click để ẩn"
+                    >
+                      Giá Thu Mới
+                    </th>
+                  )}
                   {visibleColumns.oldPrice && (
                     <th
                       className="px-6 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-muted/80"
                       onClick={() => toggleColumnVisibility("oldPrice")}
                       title="Click để ẩn"
                     >
-                      Giá Cũ
+                      Giá Thị Trường Cũ
                     </th>
                   )}
                   {visibleColumns.newPrice && (
@@ -446,7 +468,7 @@ export default function HistoryPage() {
                       onClick={() => toggleColumnVisibility("newPrice")}
                       title="Click để ẩn"
                     >
-                      Giá Mới
+                      Giá Thị Trường Mới
                     </th>
                   )}
                   {visibleColumns.change && (
@@ -500,6 +522,16 @@ export default function HistoryPage() {
                       )}
                       {visibleColumns.engineCapacity && (
                         <td className="px-6 py-3 text-sm">{history.engineCapacity}</td>
+                      )}
+                      {visibleColumns.oldBuyPrice && (
+                        <td className="px-6 py-3 text-sm text-muted-foreground">
+                          {formatPrice(history.oldBuyPrice)}
+                        </td>
+                      )}
+                      {visibleColumns.newBuyPrice && (
+                        <td className="px-6 py-3 text-sm font-medium">
+                          {formatPrice(history.newBuyPrice)}
+                        </td>
                       )}
                       {visibleColumns.oldPrice && (
                         <td className="px-6 py-3 text-sm text-muted-foreground">

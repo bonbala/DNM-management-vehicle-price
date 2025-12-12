@@ -69,7 +69,8 @@ export default function VehicleTable({
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Hãng</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Loại</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Dung Tích</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Giá Bán</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Giá Thị Trường</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Giá Thu</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Hành Động</th>
             </tr>
           </thead>
@@ -95,6 +96,14 @@ export default function VehicleTable({
                 <td className="px-6 py-4 text-sm text-foreground">{vehicle.engineCapacity}</td>
                 <td className={isAuthenticated ? "px-6 py-4 text-sm font-semibold text-foreground" : "px-6 py-4"}>
                   {isAuthenticated ? formatPrice(vehicle.salePrice) : (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <Lock size={14} />
+                      <span>Không có quyền</span>
+                    </div>
+                  )}
+                </td>
+                <td className={isAuthenticated ? "px-6 py-4 text-sm font-semibold text-foreground" : "px-6 py-4"}>
+                  {isAuthenticated ? formatPrice(vehicle.buyPrice) : (
                     <div className="flex items-center gap-2 text-muted-foreground text-sm">
                       <Lock size={14} />
                       <span>Không có quyền</span>

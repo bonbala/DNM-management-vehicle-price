@@ -34,6 +34,7 @@ export class VehicleService {
       year: doc.year,
       engineCapacity: doc.engineCapacity,
       salePrice: doc.salePrice,
+      buyPrice: doc.buyPrice || 0,
     }))
   }
 
@@ -101,6 +102,7 @@ export class VehicleService {
         year: doc.year,
         engineCapacity: doc.engineCapacity,
         salePrice: doc.salePrice,
+        buyPrice: doc.buyPrice || 0,
       })),
       total,
       page: params.page,
@@ -181,10 +183,17 @@ export class VehicleService {
       if (
         userId &&
         oldVehicle &&
-        updates.salePrice !== undefined &&
-        oldVehicle.salePrice !== updates.salePrice
+        (updates.salePrice !== undefined || updates.buyPrice !== undefined) &&
+        (oldVehicle.salePrice !== updates.salePrice || oldVehicle.buyPrice !== updates.buyPrice)
       ) {
-        await HistoryService.createHistory(id, oldVehicle.salePrice, updates.salePrice, userId)
+        await HistoryService.createHistory(
+          id,
+          oldVehicle.salePrice,
+          updates.salePrice !== undefined ? updates.salePrice : oldVehicle.salePrice,
+          userId,
+          oldVehicle.buyPrice || 0,
+          updates.buyPrice !== undefined ? updates.buyPrice : (oldVehicle.buyPrice || 0),
+        )
       }
 
       return {
@@ -195,6 +204,7 @@ export class VehicleService {
         year: updatedDoc.year,
         engineCapacity: updatedDoc.engineCapacity,
         salePrice: updatedDoc.salePrice,
+        buyPrice: updatedDoc.buyPrice || 0,
       }
     } catch (error) {
       console.error("[v0] updateVehicle error:", error)
@@ -236,10 +246,17 @@ export class VehicleService {
           if (
             userId &&
             oldVehicle &&
-            data.salePrice !== undefined &&
-            oldVehicle.salePrice !== data.salePrice
+            (data.salePrice !== undefined || data.buyPrice !== undefined) &&
+            (oldVehicle.salePrice !== data.salePrice || oldVehicle.buyPrice !== data.buyPrice)
           ) {
-            await HistoryService.createHistory(id, oldVehicle.salePrice, data.salePrice, userId)
+            await HistoryService.createHistory(
+              id,
+              oldVehicle.salePrice,
+              data.salePrice !== undefined ? data.salePrice : oldVehicle.salePrice,
+              userId,
+              oldVehicle.buyPrice || 0,
+              data.buyPrice !== undefined ? data.buyPrice : (oldVehicle.buyPrice || 0),
+            )
           }
 
           results.push({
@@ -250,6 +267,7 @@ export class VehicleService {
             year: updatedDoc.year,
             engineCapacity: updatedDoc.engineCapacity,
             salePrice: updatedDoc.salePrice,
+            buyPrice: updatedDoc.buyPrice || 0,
           })
         }
       } catch (error) {

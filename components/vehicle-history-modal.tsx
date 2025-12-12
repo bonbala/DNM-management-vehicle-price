@@ -107,6 +107,8 @@ export default function VehicleHistoryModal({ vehicleId, vehicleName, onClose }:
                 <thead className="bg-muted border-b border-border sticky top-0">
                   <tr>
                     <th className="px-6 py-3 text-left text-sm font-semibold">STT</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Giá Thu Cũ</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Giá Thu Mới</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold">Giá Cũ</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold">Giá Mới</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold">Thay Đổi</th>
@@ -120,6 +122,8 @@ export default function VehicleHistoryModal({ vehicleId, vehicleName, onClose }:
                     return (
                       <tr key={history.id} className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}>
                         <td className="px-6 py-3 text-sm">{index + 1}</td>
+                        <td className="px-6 py-3 text-sm text-muted-foreground">{formatPrice(history.oldBuyPrice)}</td>
+                        <td className="px-6 py-3 text-sm font-medium">{formatPrice(history.newBuyPrice)}</td>
                         <td className="px-6 py-3 text-sm text-muted-foreground">{formatPrice(history.oldPrice)}</td>
                         <td className="px-6 py-3 text-sm font-medium">{formatPrice(history.newPrice)}</td>
                         <td className="px-6 py-3 text-sm">
