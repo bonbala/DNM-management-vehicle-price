@@ -32,7 +32,9 @@ export default function PawnPage() {
 
   return (
     /* Thêm các class print:p-0 để tận dụng tối đa diện tích giấy khi in */
-    <div className="max-w-4xl mx-auto p-8 bg-white text-black font-serif my-10 shadow-lg print:shadow-none print:my-0 print:p-10 print:w-full">
+    <div className="max-w-4xl mx-auto p-8 bg-white text-black my-10 shadow-lg print:shadow-none print:my-0 print:p-0 print:w-full print:min-h-screen" style={{minHeight: 'auto'}}>
+      {/* Wrapper để đảm bảo trang fill hết A4 */}
+      <div className="print:flex print:flex-col print:h-screen">
       {/* Header: Logo + Tiêu đề biên bản */}
       <div className='flex justify-between items-center mb-4'>
         <div className=''>
@@ -91,7 +93,7 @@ export default function PawnPage() {
         <h2 className="bg-blue-300 border border-black border-b-0 p-1.5 font-bold uppercase text-sm">II. Thông tin tài sản</h2>
         <table className="w-full border-collapse border border-black text-left text-sm">
           <thead>
-            <tr className="bg-gray-100">
+            <tr>
               <th className="border border-black p-1.5 w-1/2">Danh mục</th>
               <th className="border border-black p-1.5 w-1/2">Mô tả</th>
             </tr>
@@ -140,7 +142,7 @@ export default function PawnPage() {
         <h2 className="bg-blue-300 border border-black border-b-0 p-1.5 font-bold uppercase text-sm">III. Xác định giá trị</h2>
         <table className="w-full border-collapse border border-black text-sm">
           <thead>
-            <tr className="bg-gray-100">
+            <tr>
               <th className="border border-black p-1.5 w-1/2">Nội dung</th>
               <th className="border border-black p-1.5 w-1/2">Giá trị (VNĐ)</th>
             </tr>
@@ -148,11 +150,11 @@ export default function PawnPage() {
           <tbody>
             <tr>
               <td className="border border-black p-1.5">Giá trị thị trường</td>
-              <td className="border border-black p-1.5 text-right">{vehicle?.salePrice?.toLocaleString('vi-VN') || "Không có thông tin"} đ</td>
+              <td className="border border-black p-1.5">{vehicle?.salePrice?.toLocaleString('vi-VN') || "Không có thông tin"} đ</td>
             </tr>
             <tr>
               <td className="border border-black p-1.5">Giá trị cơ sở</td>
-              <td className="border border-black p-1.5 text-right">{vehicle?.buyPrice?.toLocaleString('vi-VN') || "Không có thông tin"} đ</td>
+              <td className="border border-black p-1.5">{vehicle?.buyPrice?.toLocaleString('vi-VN') || "Không có thông tin"} đ</td>
             </tr>
           </tbody>
         </table>
@@ -196,23 +198,35 @@ export default function PawnPage() {
         </table>
       </section>
 
+      {/* Khoảng trống để fill hết trang A4 */}
+      <div className="print:flex-1"></div>
+
       {/* CSS bổ trợ để ép trang in không bị tràn */}
       <style jsx global>{`
         @media print {
           @page {
             size: A4;
-            margin: 10mm; /* Lề giấy vừa đủ đẹp */
+            margin: 10mm;
           }
-          body {
+          html, body {
             margin: 0;
             padding: 0;
+            background: white;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            color-adjust: exact;
           }
-          /* Chống ngắt trang giữa các bảng */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
           section {
             break-inside: avoid;
           }
         }
       `}</style>
+    </div>
     </div>
   )
 }
