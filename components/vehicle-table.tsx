@@ -84,7 +84,7 @@ export default function VehicleTable({
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Dung Tích</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Giá Thị Trường</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Giá Thu</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Hành Động</th>
+              <th className="px-6 py-3 text-center text-sm font-semibold text-foreground">Hành Động</th>
             </tr>
           </thead>
           <tbody>
