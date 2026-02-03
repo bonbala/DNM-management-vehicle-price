@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Edit2, Trash2, Lock, History } from "lucide-react"
+import { Edit2, Trash2, Lock, History, Printer } from "lucide-react"
 import type { Vehicle } from "@/types/vehicle"
 
 interface VehicleTableProps {
@@ -51,6 +51,19 @@ export default function VehicleTable({
 
   const allSelected = vehicles.length > 0 && vehicles.every((v) => selectedIds.has(v.id))
 
+  const handlePrint = (vehicle: Vehicle) => {
+    if (typeof window !== "undefined") {
+      // Lưu thông tin xe vào localStorage (được chia sẻ giữa các tab)
+      localStorage.setItem('selectedVehicle', JSON.stringify(vehicle));
+      // Mở một cửa sổ mới với kích thước lớn
+      window.open(
+        "/pawn",
+        "_blank",
+        "noopener,noreferrer,width=1200,height=800"
+      );
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">
@@ -78,9 +91,8 @@ export default function VehicleTable({
             {vehicles.map((vehicle, index) => (
               <tr
                 key={vehicle.id}
-                className={`${index % 2 === 0 ? "bg-background" : "bg-muted/30"} ${
-                  selectedIds.has(vehicle.id) && isAuthenticated ? "bg-primary/10" : ""
-                }`}
+                className={`${index % 2 === 0 ? "bg-background" : "bg-muted/30"} ${selectedIds.has(vehicle.id) && isAuthenticated ? "bg-primary/10" : ""
+                  }`}
               >
                 <td className="px-6 py-4">
                   <Checkbox
@@ -131,6 +143,15 @@ export default function VehicleTable({
                           title="Xem lịch sử thay đổi"
                         >
                           <History size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:bg-blue-100"
+                          title="In biên bản xác định giá trị xe"
+                          onClick={() => handlePrint(vehicle)}
+                        >
+                          <Printer size={16} />
                         </Button>
                         <Button
                           variant="ghost"
