@@ -23,16 +23,16 @@ export async function POST(request: NextRequest) {
     const identifier = `login:${ip}`
 
     // Check rate limit
-    if (!checkRateLimit(identifier)) {
-      const resetTime = getResetTime(identifier)
-      return NextResponse.json(
-        {
-          error: `Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau ${resetTime} giây`,
-          remainingAttempts: 0,
-        },
-        { status: 429 }
-      )
-    }
+    // if (!checkRateLimit(identifier)) {
+    //   const resetTime = getResetTime(identifier)
+    //   return NextResponse.json(
+    //     {
+    //       error: `Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau ${resetTime} giây`,
+    //       remainingAttempts: 0,
+    //     },
+    //     { status: 429 }
+    //   )
+    // }
 
     const body = await request.json()
     const { username, password } = body

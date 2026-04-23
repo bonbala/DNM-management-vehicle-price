@@ -85,6 +85,7 @@ export default function VehicleTable({
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Giá Thị Trường</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Giá Thu</th>
               <th className="px-6 py-3 text-center text-sm font-semibold text-foreground">Hành Động</th>
+              <th className="px-6 py-3 text-center text-sm font-semibold text-foreground">In</th>
             </tr>
           </thead>
           <tbody>
@@ -144,15 +145,7 @@ export default function VehicleTable({
                         >
                           <History size={16} />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-600 hover:bg-blue-100"
-                          title="In biên bản xác định giá trị xe"
-                          onClick={() => handlePrint(vehicle)}
-                        >
-                          <Printer size={16} />
-                        </Button>
+                        
                         <Button
                           variant="ghost"
                           size="sm"
@@ -174,6 +167,17 @@ export default function VehicleTable({
                       </div>
                     )}
                   </div>
+                </td>
+                <td className="px-6 py-4">
+                  <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:bg-blue-100"
+                          title="In biên bản xác định giá trị xe"
+                          onClick={() => handlePrint(vehicle)}
+                        >
+                          <Printer size={16} />
+                        </Button>
                 </td>
               </tr>
             ))}
