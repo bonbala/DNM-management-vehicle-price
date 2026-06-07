@@ -28,3 +28,7 @@ Thumbs.db
 
 # Documentation (Analysis, guides, security reports)
 docs/
+
+# Claude Code local settings (contains credentials)
+.claude/settings.local.json
+.mcp.json
