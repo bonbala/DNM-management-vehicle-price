@@ -26,6 +26,7 @@ import {
   User,
   Clock,
   StickyNote,
+  Printer,
 } from "lucide-react"
 import type { ViolationContract, CreateViolationContractDto, ViolationStatus } from "@/types/violation-contract"
 
@@ -158,6 +159,12 @@ export default function HdvpPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handlePrint = (c: ViolationContract, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    localStorage.setItem("selectedViolationContract", JSON.stringify(c))
+    window.open("/hdvp/print", "_blank", "width=900,height=700,menubar=no,toolbar=no,location=no,status=no")
   }
 
   const handleDelete = async (id: string, e?: React.MouseEvent) => {
@@ -343,6 +350,14 @@ export default function HdvpPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
+                                className="h-8 w-8 hover:bg-green-50 hover:text-green-600"
+                                onClick={(e) => handlePrint(c, e)}
+                              >
+                                <Printer size={15} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
                                 onClick={(e) => handleDelete(c.id, e)}
                                 disabled={deletingId === c.id}
@@ -462,31 +477,42 @@ export default function HdvpPage() {
               </div>
 
               {/* Actions */}
-              {canAccess(["admin", "super_admin"]) && (
-                <div className="flex justify-end gap-2 mt-5 pt-4 border-t">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-                    onClick={(e) => handleDelete(viewingContract.id, e)}
-                    disabled={deletingId === viewingContract.id}
-                  >
-                    {deletingId === viewingContract.id
-                      ? <Loader2 size={14} className="animate-spin" />
-                      : <Trash2 size={14} />
-                    }
-                    Xóa
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={(e) => openEdit(viewingContract, e)}
-                  >
-                    <Edit3 size={14} />
-                    Chỉnh sửa
-                  </Button>
-                </div>
-              )}
+              <div className={`flex gap-2 mt-5 pt-4 border-t ${canAccess(["admin", "super_admin"]) ? "justify-between" : "justify-end"}`}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 hover:bg-green-50 hover:text-green-600 hover:border-green-200"
+                  onClick={(e) => handlePrint(viewingContract, e)}
+                >
+                  <Printer size={14} />
+                  In biên bản
+                </Button>
+                {canAccess(["admin", "super_admin"]) && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                      onClick={(e) => handleDelete(viewingContract.id, e)}
+                      disabled={deletingId === viewingContract.id}
+                    >
+                      {deletingId === viewingContract.id
+                        ? <Loader2 size={14} className="animate-spin" />
+                        : <Trash2 size={14} />
+                      }
+                      Xóa
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={(e) => openEdit(viewingContract, e)}
+                    >
+                      <Edit3 size={14} />
+                      Chỉnh sửa
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
         </div>
