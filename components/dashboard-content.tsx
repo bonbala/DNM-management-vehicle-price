@@ -389,6 +389,11 @@ export default function DashboardContent() {
                       Lịch Sử
                     </Button>
                   </Link>
+                  <Link href="/hdvp">
+                    <Button variant="outline" className="gap-2">
+                      KH Vi Phạm
+                    </Button>
+                  </Link>
                   {canAccess(["super_admin"]) && (
                     <Link href="/audit-logs">
                       <Button variant="outline" className="gap-2">
