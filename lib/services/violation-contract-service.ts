@@ -7,7 +7,14 @@ let indexEnsured = false
 async function getCollection() {
   const col = await getViolationContractsCollection()
   if (!indexEnsured) {
-    await col.createIndex({ customerName: 1 }, { unique: true })
+    // Drop stale indexes from previous schema iterations
+    try { await col.dropIndex("customerName_1") } catch { /* not found, skip */ }
+    try { await col.dropIndex("customerId_1") } catch { /* not found, skip */ }
+    // Only enforce uniqueness on non-empty customerId values
+    await col.createIndex(
+      { customerId: 1 },
+      { unique: true, partialFilterExpression: { customerId: { $gt: "" } } }
+    )
     indexEnsured = true
   }
   return col
@@ -23,14 +30,7 @@ export class ViolationContractService {
   static async getPaginated(page: number, limit: number, search?: string) {
     const col = await getCollection()
     const query = search
-      ? {
-          $or: [
-            { customerName: { $regex: search, $options: "i" } },
-            { phoneNumber: { $regex: search, $options: "i" } },
-            { customerId: { $regex: search, $options: "i" } },
-            { vehicleName: { $regex: search, $options: "i" } },
-          ],
-        }
+      ? { customerId: { $regex: search, $options: "i" } }
       : {}
 
     const total = await col.countDocuments(query)
@@ -60,9 +60,13 @@ export class ViolationContractService {
   static async create(dto: CreateViolationContractDto, createdBy: string): Promise<ViolationContract> {
     const col = await getCollection()
 
-    const existing = await col.findOne({ customerName: dto.customerName })
+    if (!dto.customerName?.trim()) throw new Error("Tên khách hàng không được để trống")
+    if (!dto.customerId?.trim()) throw new Error("CMND/CCCD không được để trống")
+    if (!dto.phoneNumber?.trim()) throw new Error("Số điện thoại không được để trống")
+
+    const existing = await col.findOne({ customerId: dto.customerId })
     if (existing) {
-      throw new Error(`Khách hàng "${dto.customerName}" đã tồn tại trong hệ thống`)
+      throw new Error(`CMND/CCCD "${dto.customerId}" đã tồn tại trong hệ thống`)
     }
 
     const now = new Date()
@@ -80,13 +84,13 @@ export class ViolationContractService {
   static async update(id: string, dto: Partial<CreateViolationContractDto>): Promise<ViolationContract | null> {
     const col = await getCollection()
 
-    if (dto.customerName) {
+    if (dto.customerId) {
       const existing = await col.findOne({
-        customerName: dto.customerName,
+        customerId: dto.customerId,
         _id: { $ne: new ObjectId(id) },
       })
       if (existing) {
-        throw new Error(`Khách hàng "${dto.customerName}" đã tồn tại trong hệ thống`)
+        throw new Error(`CMND/CCCD "${dto.customerId}" đã tồn tại trong hệ thống`)
       }
     }
 

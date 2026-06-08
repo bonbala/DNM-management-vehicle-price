@@ -132,8 +132,8 @@ export default function HdvpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.customerName || !form.vehicleName) {
-      setFormError("Vui lòng điền đầy đủ các trường bắt buộc")
+    if (!form.customerName || !form.customerId || !form.phoneNumber) {
+      setFormError("Vui lòng điền đầy đủ: Tên khách hàng, CMND/CCCD và Số điện thoại")
       return
     }
     setIsSubmitting(true)
@@ -165,6 +165,11 @@ export default function HdvpPage() {
     e?.stopPropagation()
     localStorage.setItem("selectedViolationContract", JSON.stringify(c))
     window.open("/hdvp/print", "_blank", "width=900,height=700,menubar=no,toolbar=no,location=no,status=no")
+  }
+
+  const handlePrintClean = () => {
+    localStorage.setItem("cleanViolationSearchId", debouncedSearch)
+    window.open("/hdvp/print-clean", "_blank", "width=900,height=700,menubar=no,toolbar=no,location=no,status=no")
   }
 
   const handleDelete = async (id: string, e?: React.MouseEvent) => {
@@ -243,14 +248,26 @@ export default function HdvpPage() {
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <div className="relative w-full sm:w-80">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Tìm theo tên, SĐT, CMND, tên xe..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative w-full sm:w-72">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Tìm theo CMND / CCCD..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {debouncedSearch.trim() && !isTableLoading && contracts.length === 0 && (
+              <Button
+                variant="outline"
+                className="gap-2 whitespace-nowrap border-green-300 text-green-700 hover:bg-green-50 hover:border-green-400"
+                onClick={handlePrintClean}
+              >
+                <Printer size={16} />
+                In không vi phạm
+              </Button>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -552,22 +569,28 @@ export default function HdvpPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-medium">Số điện thoại</label>
+                    <label className="text-sm font-medium">
+                      Số điện thoại <span className="text-red-500">*</span>
+                    </label>
                     <Input
                       value={form.phoneNumber}
-                      onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+                      onChange={(e) => { setForm({ ...form, phoneNumber: e.target.value }); setFormError(null) }}
                       placeholder="0901234567"
+                      required
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-sm font-medium">CMND / CCCD</label>
+                    <label className="text-sm font-medium">
+                      CMND / CCCD <span className="text-red-500">*</span>
+                    </label>
                     <Input
                       value={form.customerId}
-                      onChange={(e) => setForm({ ...form, customerId: e.target.value })}
+                      onChange={(e) => { setForm({ ...form, customerId: e.target.value }); setFormError(null) }}
                       placeholder="012345678901"
+                      required
                     />
                   </div>
                   <div className="space-y-1">
