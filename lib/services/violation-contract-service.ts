@@ -115,6 +115,7 @@ export class ViolationContractService {
       customerId: doc.customerId as string,
       address: doc.address as string,
       vehicleName: doc.vehicleName as string,
+      violationMoney: (doc.violationMoney as number) ?? 0,
       violationDate: doc.violationDate as Date,
       status: doc.status as ViolationContract["status"],
       notes: doc.notes as string | undefined,

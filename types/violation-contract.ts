@@ -7,6 +7,7 @@ export interface ViolationContract {
   customerId: string
   address: string
   vehicleName: string
+  violationMoney: number
   violationDate: string | Date
   status: ViolationStatus
   notes?: string
@@ -21,6 +22,7 @@ export interface CreateViolationContractDto {
   customerId: string
   address: string
   vehicleName: string
+  violationMoney: number
   violationDate: string
   status: ViolationStatus
   notes?: string

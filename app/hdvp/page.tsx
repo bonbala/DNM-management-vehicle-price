@@ -41,6 +41,7 @@ const EMPTY_FORM: CreateViolationContractDto = {
   customerId: "",
   address: "",
   vehicleName: "",
+  violationMoney: 0,  
   violationDate: new Date().toISOString().split("T")[0],
   status: "pending",
   notes: "",
@@ -121,6 +122,7 @@ export default function HdvpPage() {
       customerId: c.customerId,
       address: c.address,
       vehicleName: c.vehicleName,
+      violationMoney: c.violationMoney,
       violationDate: new Date(c.violationDate).toISOString().split("T")[0],
       status: c.status,
       notes: c.notes || "",
@@ -196,6 +198,12 @@ export default function HdvpPage() {
 
   const formatDateTime = (date: string | Date) =>
     new Date(date).toLocaleString("vi-VN")
+
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND"
+    }).format(amount)
 
   if (isLoading) {
     return (
@@ -295,6 +303,7 @@ export default function HdvpPage() {
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Địa chỉ</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Tên xe</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Ngày VP</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Số tiền</th>
                   <th className="px-4 py-3 text-center font-medium text-muted-foreground whitespace-nowrap">Trạng thái</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Lịch Sử</th>
                   {canAccess(["admin", "super_admin"]) && (
@@ -339,6 +348,9 @@ export default function HdvpPage() {
                         <td className="px-4 py-3 max-w-40 truncate" title={c.address}>{c.address}</td>
                         <td className="px-4 py-3">{c.vehicleName}</td>
                         <td className="px-4 py-3 whitespace-nowrap">{formatDate(c.violationDate)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-right font-medium">
+                          {c.violationMoney ? formatCurrency(c.violationMoney) : <span className="text-muted-foreground/40 text-xs italic">—</span>}
+                        </td>
                         <td className="px-4 py-3 text-center">
                           <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${status.color}`}>
                             {status.label}
@@ -465,6 +477,12 @@ export default function HdvpPage() {
                   <ViewField icon={<Car size={14} />} label="Tên xe" value={viewingContract.vehicleName} />
                   <ViewField icon={<Calendar size={14} />} label="Ngày vi phạm" value={formatDate(viewingContract.violationDate)} />
                 </div>
+
+                <ViewField
+                  icon={<CreditCard size={14} />}
+                  label="Số tiền vi phạm"
+                  value={viewingContract.violationMoney ? formatCurrency(viewingContract.violationMoney) : undefined}
+                />
 
                 {/* Lịch Sử / Notes */}
                 <div className="rounded-lg border bg-muted/30 p-3 space-y-1.5">
@@ -612,6 +630,16 @@ export default function HdvpPage() {
                     value={form.address}
                     onChange={(e) => setForm({ ...form, address: e.target.value })}
                     placeholder="123 Nguyễn Huệ, Q.1, TP.HCM"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Số tiền vi phạm</label>
+                  <Input
+                    type="number"
+                    value={form.violationMoney}
+                    onChange={(e) => setForm({ ...form, violationMoney: Number(e.target.value) })}
+                    placeholder="500000"
+                    min={0}
                   />
                 </div>
 
