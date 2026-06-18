@@ -46,3 +46,8 @@ export async function getViolationContractsCollection() {
   const { db } = await connectToDatabase()
   return db.collection("violation_contracts")
 }
+
+export async function getAssetsCollection() {
+  const { db } = await connectToDatabase()
+  return db.collection("assets")
+}

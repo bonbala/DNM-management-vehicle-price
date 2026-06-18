@@ -13,6 +13,7 @@ import FilterBar from "@/components/filter-bar"
 import BulkAddForm from "@/components/bulk-add-form"
 import BulkEditForm from "@/components/bulk-edit-form"
 import VehicleHistoryModal from "@/components/vehicle-history-modal"
+import QuickSearch from "@/components/quick-search"
 import { VehicleAPI } from "@/lib/api-client"
 import { exportVehiclesWithDateRange, exportAllVehiclesToExcel } from "@/lib/export-excel"
 import type { Vehicle } from "@/types/vehicle"
@@ -170,6 +171,7 @@ export default function DashboardContent() {
   const [showBulkEdit, setShowBulkEdit] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null)
+  const [showQuickSearch, setShowQuickSearch] = useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [selectedVehicleForHistory, setSelectedVehicleForHistory] = useState<Vehicle | null>(null)
 
@@ -394,6 +396,11 @@ export default function DashboardContent() {
                       KH Vi Phạm
                     </Button>
                   </Link>
+                  <Link href="/qlts">
+                    <Button variant="outline" className="gap-2">
+                      Quản lý tài sản
+                    </Button>
+                  </Link>
                   {canAccess(["super_admin"]) && (
                     <Link href="/audit-logs">
                       <Button variant="outline" className="gap-2">
@@ -401,6 +408,10 @@ export default function DashboardContent() {
                       </Button>
                     </Link>
                   )}
+                  <Button variant="outline" onClick={() => setShowQuickSearch(true)} className="gap-2">
+                    <Search size={18} />
+                    Tra cứu nhanh
+                  </Button>
                   <Button variant="outline" onClick={logout} className="gap-2 bg-transparent hover:bg-red-500">
                     <LogOut size={18} />
                     Đăng xuất
@@ -425,64 +436,6 @@ export default function DashboardContent() {
                   <Button variant="destructive" onClick={handleBulkDelete} className="gap-2">
                     <Trash2 size={18} />
                     Xóa ({selectedIds.size})
-                  </Button>
-                </>
-              )}
-              <Button
-                onClick={() => {
-                  setEditingVehicle(null)
-                  setShowForm(true)
-                }}
-                disabled={!isAuthenticated || !canAccess(["admin", "super_admin"])}
-                className="gap-2"
-              >
-                <Plus size={18} />
-                Thêm Xe Mới
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowBulkAdd(true)}
-                disabled={!isAuthenticated || !canAccess(["admin", "super_admin"])}
-                className="gap-2"
-              >
-                <Plus size={18} />
-                Thêm Nhiều
-              </Button>
-              {canAccess(["super_admin"]) && (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      if (vehicles.length === 0) {
-                        alert("Không có xe để xuất")
-                        return
-                      }
-                      exportVehiclesWithDateRange(vehicles)
-                    }}
-                    className="gap-2"
-                    title="Xuất danh sách xe hiện tại sang Excel"
-                  >
-                    <Download size={18} />
-                    Xuất Excel
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={async () => {
-                      try {
-                        setIsExporting(true)
-                        await exportAllVehiclesToExcel()
-                      } catch (error) {
-                        alert(error instanceof Error ? error.message : "Lỗi khi xuất Excel")
-                      } finally {
-                        setIsExporting(false)
-                      }
-                    }}
-                    disabled={isExporting}
-                    className="gap-2"
-                    title="Xuất toàn bộ danh sách xe từ database"
-                  >
-                    <Download size={18} />
-                    {isExporting ? "Đang xuất..." : "Xuất Hết"}
                   </Button>
                 </>
               )}
@@ -530,20 +483,86 @@ export default function DashboardContent() {
             </div>
           </Card>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Sắp xếp:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => {
-                setSortBy(e.target.value as "nameAsc" | "nameDesc")
-                setCurrentPage(1)
-              }}
-              className="px-3 py-2 text-sm border border-border rounded-md bg-background"
-            >
-              <option value="default">Mới nhất</option>
-              <option value="nameAsc">Tên A-Z</option>
-              <option value="nameDesc">Tên Z-A</option>
-            </select>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Sắp xếp:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value as "nameAsc" | "nameDesc")
+                  setCurrentPage(1)
+                }}
+                className="px-3 py-2 text-sm border border-border rounded-md bg-background"
+              >
+                <option value="default">Mới nhất</option>
+                <option value="nameAsc">Tên A-Z</option>
+                <option value="nameDesc">Tên Z-A</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditingVehicle(null)
+                  setShowForm(true)
+                }}
+                disabled={!isAuthenticated || !canAccess(["admin", "super_admin"])}
+                className="gap-1"
+              >
+                <Plus size={16} />
+                Thêm Xe Mới
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowBulkAdd(true)}
+                disabled={!isAuthenticated || !canAccess(["admin", "super_admin"])}
+                className="gap-1"
+              >
+                <Plus size={16} />
+                Thêm Nhiều
+              </Button>
+              {canAccess(["super_admin"]) && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (vehicles.length === 0) {
+                        alert("Không có xe để xuất")
+                        return
+                      }
+                      exportVehiclesWithDateRange(vehicles)
+                    }}
+                    className="gap-1"
+                    title="Xuất danh sách xe hiện tại sang Excel"
+                  >
+                    <Download size={16} />
+                    Xuất Excel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        setIsExporting(true)
+                        await exportAllVehiclesToExcel()
+                      } catch (error) {
+                        alert(error instanceof Error ? error.message : "Lỗi khi xuất Excel")
+                      } finally {
+                        setIsExporting(false)
+                      }
+                    }}
+                    disabled={isExporting}
+                    className="gap-1"
+                    title="Xuất toàn bộ danh sách xe từ database"
+                  >
+                    <Download size={16} />
+                    {isExporting ? "Đang xuất..." : "Xuất Hết"}
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="text-sm text-muted-foreground">
@@ -691,6 +710,10 @@ export default function DashboardContent() {
           distinctTypes={distinctTypes}
           distinctEngines={distinctEngines}
         />
+      )}
+
+      {showQuickSearch && (
+        <QuickSearch onClose={() => setShowQuickSearch(false)} />
       )}
 
       {showHistoryModal && selectedVehicleForHistory && (

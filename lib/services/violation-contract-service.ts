@@ -50,6 +50,13 @@ export class ViolationContractService {
     }
   }
 
+  static async findByCustomerId(customerId: string): Promise<ViolationContract | null> {
+    const col = await getCollection()
+    const doc = await col.findOne({ customerId })
+    if (!doc) return null
+    return ViolationContractService.toContract(doc)
+  }
+
   static async getById(id: string): Promise<ViolationContract | null> {
     const col = await getCollection()
     const doc = await col.findOne({ _id: new ObjectId(id) })
