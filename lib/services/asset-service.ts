@@ -51,6 +51,15 @@ export class AssetService {
     }
   }
 
+  static async findByPlateOrVin(query: string): Promise<Asset | null> {
+    const col = await getCollection()
+    const doc = await col.findOne({
+      $or: [{ plateNumber: query }, { vehicleIdNumber: query }],
+    })
+    if (!doc) return null
+    return AssetService.toAsset(doc)
+  }
+
   static async getById(id: string): Promise<Asset | null> {
     const col = await getCollection()
     const doc = await col.findOne({ _id: new ObjectId(id) })

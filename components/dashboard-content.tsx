@@ -13,6 +13,7 @@ import FilterBar from "@/components/filter-bar"
 import BulkAddForm from "@/components/bulk-add-form"
 import BulkEditForm from "@/components/bulk-edit-form"
 import VehicleHistoryModal from "@/components/vehicle-history-modal"
+import QuickSearch from "@/components/quick-search"
 import { VehicleAPI } from "@/lib/api-client"
 import { exportVehiclesWithDateRange, exportAllVehiclesToExcel } from "@/lib/export-excel"
 import type { Vehicle } from "@/types/vehicle"
@@ -170,6 +171,7 @@ export default function DashboardContent() {
   const [showBulkEdit, setShowBulkEdit] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null)
+  const [showQuickSearch, setShowQuickSearch] = useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [selectedVehicleForHistory, setSelectedVehicleForHistory] = useState<Vehicle | null>(null)
 
@@ -406,6 +408,10 @@ export default function DashboardContent() {
                       </Button>
                     </Link>
                   )}
+                  <Button variant="outline" onClick={() => setShowQuickSearch(true)} className="gap-2">
+                    <Search size={18} />
+                    Tra cứu nhanh
+                  </Button>
                   <Button variant="outline" onClick={logout} className="gap-2 bg-transparent hover:bg-red-500">
                     <LogOut size={18} />
                     Đăng xuất
@@ -704,6 +710,10 @@ export default function DashboardContent() {
           distinctTypes={distinctTypes}
           distinctEngines={distinctEngines}
         />
+      )}
+
+      {showQuickSearch && (
+        <QuickSearch onClose={() => setShowQuickSearch(false)} />
       )}
 
       {showHistoryModal && selectedVehicleForHistory && (
