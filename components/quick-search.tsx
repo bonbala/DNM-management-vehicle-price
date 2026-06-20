@@ -101,16 +101,21 @@ export default function QuickSearch({ onClose }: { onClose: () => void }) {
         className="w-full max-w-4xl shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Zap size={22} className="text-primary" />
-              <h2 className="text-lg font-bold text-foreground">Tra cứu nhanh</h2>
+        {/* Header */}
+        <div className="p-6">         
+          <div className="mb-6">
+            <div className="flex items-center justify-between ">
+              <div className="flex items-center gap-2">
+                <Zap size={22} className="text-primary" />
+                <h2 className="text-lg font-bold text-foreground">Tra cứu nhanh</h2>
+              </div>
+              <Button variant="ghost" size="icon" onClick={onClose}>
+                <X size={18} />
+              </Button>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X size={18} />
-            </Button>
+            <div>
+              <h2>Thời điểm tra cứu: {formatDateTime(new Date())}</h2>
+            </div>
           </div>
 
           {/* Two columns */}
