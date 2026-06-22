@@ -231,7 +231,7 @@ export default function QltsPage() {
             <span className="text-sm text-muted-foreground whitespace-nowrap">
               Tổng: <strong>{total}</strong> tài sản
             </span>
-            {canAccess(["admin", "super_admin"]) && (
+            {canAccess(["admin", "super_admin", "user"]) && (
               <Button onClick={openAdd} className="gap-2 whitespace-nowrap">
                 <Plus size={16} />
                 Thêm mới
