@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authCheck = requireAuth(request, ["admin", "super_admin"])
+  const authCheck = requireAuth(request, ["admin", "super_admin","user"])
   if (!authCheck.isValid) return authCheck.response!
 
   try {
