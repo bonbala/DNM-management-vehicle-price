@@ -35,7 +35,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authCheck = requireAuth(request, ["admin", "super_admin"])
+  const authCheck = requireAuth(request, ["admin", "super_admin","user"])
   if (!authCheck.isValid) return authCheck.response!
 
   try {
