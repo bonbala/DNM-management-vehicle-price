@@ -253,7 +253,7 @@ export default function QltsPage() {
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Tên khách hàng</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Ghi chú</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Ngày tạo</th>
-                  {canAccess(["admin", "super_admin"]) && (
+                  {canAccess(["admin", "super_admin", "user"]) && (
                     <th className="px-4 py-3 text-center font-medium text-muted-foreground whitespace-nowrap">Thao tác</th>
                   )}
                 </tr>
@@ -303,10 +303,10 @@ export default function QltsPage() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
                         {formatDateTime(a.createdAt)}
-                      </td>
-                      {canAccess(["admin", "super_admin"]) && (
+                      </td>    
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center gap-1">
+                            {canAccess(["admin", "super_admin"]) && (                            
                             <Button
                               variant="ghost"
                               size="icon"
@@ -314,8 +314,8 @@ export default function QltsPage() {
                               onClick={(e) => openEdit(a, e)}
                             >
                               <Edit3 size={15} />
-                            </Button>
-                            <Button
+                            </Button>)}
+                            {canAccess(["admin", "super_admin","user"]) && (<Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
@@ -327,10 +327,9 @@ export default function QltsPage() {
                               ) : (
                                 <Trash2 size={15} />
                               )}
-                            </Button>
+                            </Button>)}                           
                           </div>
-                        </td>
-                      )}
+                        </td>                   
                     </tr>
                     )
                   })
