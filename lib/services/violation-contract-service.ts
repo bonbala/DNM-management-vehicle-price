@@ -1,4 +1,4 @@
-import type { ViolationContract, CreateViolationContractDto } from "@/types/violation-contract"
+import type { ViolationContract, CreateViolationContractDto, Evidence } from "@/types/violation-contract"
 import { getViolationContractsCollection } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 
@@ -126,6 +126,7 @@ export class ViolationContractService {
       violationDate: doc.violationDate as Date,
       status: doc.status as ViolationContract["status"],
       notes: doc.notes as string | undefined,
+      evidences: (doc.evidences as Evidence[] | undefined) || [],
       createdBy: doc.createdBy as string,
       createdAt: doc.createdAt as Date,
       updatedAt: doc.updatedAt as Date,
