@@ -27,8 +27,13 @@ import {
   Clock,
   StickyNote,
   Printer,
+  Upload,
+  ImageIcon,
+  Video,
+  ExternalLink,
+  Paperclip,
 } from "lucide-react"
-import type { ViolationContract, CreateViolationContractDto, ViolationStatus } from "@/types/violation-contract"
+import type { ViolationContract, CreateViolationContractDto, ViolationStatus, Evidence } from "@/types/violation-contract"
 
 const STATUS_MAP: Record<ViolationStatus, { label: string; color: string }> = {
   pending: { label: "Chờ xử lý", color: "text-yellow-600 bg-yellow-50" },
@@ -45,6 +50,7 @@ const EMPTY_FORM: CreateViolationContractDto = {
   violationDate: new Date().toISOString().split("T")[0],
   status: "pending",
   notes: "",
+  evidences: [],
 }
 
 export default function HdvpPage() {
@@ -70,6 +76,39 @@ export default function HdvpPage() {
   const [formError, setFormError] = useState<string | null>(null)
 
   const [viewingContract, setViewingContract] = useState<ViolationContract | null>(null)
+  const [uploadingFiles, setUploadingFiles] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const handleFileUpload = async (files: FileList) => {
+    setUploadingFiles(true)
+    setFormError(null)
+    const newEvidences: Evidence[] = [...(form.evidences || [])]
+    try {
+      for (const file of Array.from(files)) {
+        const fd = new FormData()
+        fd.append("file", file)
+        const res = await fetch("/api/upload", { method: "POST", credentials: "include", body: fd })
+        if (!res.ok) {
+          const err = await res.json()
+          setFormError(err.error || `Lỗi upload ${file.name}`)
+          break
+        }
+        const data = await res.json()
+        newEvidences.push({
+          url: data.url,
+          publicId: data.publicId,
+          name: data.name,
+          resourceType: data.resourceType,
+        })
+      }
+      setForm((prev) => ({ ...prev, evidences: newEvidences }))
+    } catch {
+      setFormError("Lỗi kết nối khi upload file")
+    } finally {
+      setUploadingFiles(false)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+    }
+  }
 
   useEffect(() => {
     if (searchTimeout.current) clearTimeout(searchTimeout.current)
@@ -126,6 +165,7 @@ export default function HdvpPage() {
       violationDate: new Date(c.violationDate).toISOString().split("T")[0],
       status: c.status,
       notes: c.notes || "",
+      evidences: c.evidences || [],
     })
     setFormError(null)
     setViewingContract(null)
@@ -305,6 +345,7 @@ export default function HdvpPage() {
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Ngày VP</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Số tiền</th>
                   <th className="px-4 py-3 text-center font-medium text-muted-foreground whitespace-nowrap">Trạng thái</th>
+                  <th className="px-4 py-3 text-center font-medium text-muted-foreground whitespace-nowrap">Chứng từ</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Lịch Sử</th>
                   {canAccess(["admin", "super_admin"]) && (
                     <th className="px-4 py-3 text-center font-medium text-muted-foreground whitespace-nowrap">Thao tác</th>
@@ -314,13 +355,13 @@ export default function HdvpPage() {
               <tbody>
                 {isTableLoading ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-12">
+                    <td colSpan={12} className="text-center py-12">
                       <Loader2 size={24} className="animate-spin text-primary mx-auto" />
                     </td>
                   </tr>
                 ) : contracts.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={12} className="text-center py-12 text-muted-foreground">
                       <Users size={40} className="mx-auto mb-2 opacity-30" />
                       <p>Chưa có khách hàng vi phạm nào</p>
                     </td>
@@ -355,6 +396,16 @@ export default function HdvpPage() {
                           <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${status.color}`}>
                             {status.label}
                           </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {c.evidences && c.evidences.length > 0 ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-blue-600 bg-blue-50">
+                              <Paperclip size={11} />
+                              {c.evidences.length}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/40 text-xs italic">—</span>
+                          )}
                         </td>
                         <td className="px-4 py-3 max-w-[200px]">
                           {c.notes ? (
@@ -496,6 +547,39 @@ export default function HdvpPage() {
                       : <span className="text-muted-foreground italic text-xs">Không có ghi chú</span>
                     }
                   </p>
+                </div>
+
+                {/* Chứng từ */}
+                <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <Paperclip size={13} />
+                    Chứng từ vi phạm
+                  </div>
+                  {viewingContract.evidences && viewingContract.evidences.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      {viewingContract.evidences.map((ev, idx) => (
+                        <a
+                          key={idx}
+                          href={ev.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-2.5 py-2 rounded-md border bg-background hover:bg-primary/5 hover:border-primary/30 transition-colors group"
+                        >
+                          {ev.resourceType === "video" ? (
+                            <Video size={14} className="text-purple-500 shrink-0" />
+                          ) : (
+                            <ImageIcon size={14} className="text-blue-500 shrink-0" />
+                          )}
+                          <span className="text-xs text-foreground truncate flex-1">
+                            {ev.name || `Chứng từ ${idx + 1}`}
+                          </span>
+                          <ExternalLink size={11} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">Không có chứng từ</p>
+                  )}
                 </div>
 
                 {/* Meta */}
@@ -677,11 +761,79 @@ export default function HdvpPage() {
                   />
                 </div>
 
+                {/* Upload chứng từ */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-1.5">
+                    <Paperclip size={14} />
+                    Chứng từ vi phạm
+                  </label>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) handleFileUpload(e.target.files)
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 w-full border-dashed"
+                    disabled={uploadingFiles}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {uploadingFiles ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        Đang upload...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={14} />
+                        Chọn ảnh (max 10MB) / video (max 100MB)
+                      </>
+                    )}
+                  </Button>
+
+                  {form.evidences && form.evidences.length > 0 && (
+                    <div className="space-y-1.5">
+                      {form.evidences.map((ev, idx) => (
+                        <div key={idx} className="flex items-center gap-2 px-2.5 py-1.5 rounded-md border bg-muted/20">
+                          {ev.resourceType === "video" ? (
+                            <Video size={14} className="text-purple-500 shrink-0" />
+                          ) : (
+                            <ImageIcon size={14} className="text-blue-500 shrink-0" />
+                          )}
+                          <span className="text-xs text-foreground truncate flex-1">{ev.name}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0 hover:bg-red-50 hover:text-red-600"
+                            onClick={() => {
+                              setForm((prev) => ({
+                                ...prev,
+                                evidences: prev.evidences?.filter((_, i) => i !== idx),
+                              }))
+                            }}
+                          >
+                            <X size={12} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex justify-end gap-2 pt-2">
                   <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
                     Hủy
                   </Button>
-                  <Button type="submit" disabled={isSubmitting} className="gap-2">
+                  <Button type="submit" disabled={isSubmitting || uploadingFiles} className="gap-2">
                     {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                     {editingContract ? "Cập nhật" : "Thêm mới"}
                   </Button>
