@@ -336,8 +336,8 @@ export default function HdvpPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/50 border-b">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">STT</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Khách hàng</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap sticky left-0 z-20 bg-muted w-14">STT</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap sticky left-14 z-20 bg-muted border-r border-border">Khách hàng</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">SĐT</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">CMND / CCCD</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Địa chỉ</th>
@@ -348,7 +348,7 @@ export default function HdvpPage() {
                   <th className="px-4 py-3 text-center font-medium text-muted-foreground whitespace-nowrap">Chứng từ</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground whitespace-nowrap">Lịch Sử</th>
                   {canAccess(["admin", "super_admin"]) && (
-                    <th className="px-4 py-3 text-center font-medium text-muted-foreground whitespace-nowrap">Thao tác</th>
+                    <th className="px-4 py-3 text-center font-medium text-muted-foreground whitespace-nowrap sticky right-0 z-20 bg-muted border-l border-border">Thao tác</th>
                   )}
                 </tr>
               </thead>
@@ -380,10 +380,10 @@ export default function HdvpPage() {
                         }`}
                         onClick={() => setViewingContract(isSelected ? null : c)}
                       >
-                        <td className="px-4 py-3 text-muted-foreground">
+                        <td className={`px-4 py-3 text-muted-foreground sticky left-0 z-10 w-14 bg-card ${isSelected ? "border-l-2 border-l-primary" : ""}`}>
                           {(currentPage - 1) * limit + idx + 1}
                         </td>
-                        <td className="px-4 py-3 font-medium">{c.customerName}</td>
+                        <td className="px-4 py-3 font-medium sticky left-14 z-10 bg-card border-r border-border">{c.customerName}</td>
                         <td className="px-4 py-3">{c.phoneNumber}</td>
                         <td className="px-4 py-3 font-mono text-sm">{c.customerId}</td>
                         <td className="px-4 py-3 max-w-40 truncate" title={c.address}>{c.address}</td>
@@ -417,7 +417,7 @@ export default function HdvpPage() {
                           )}
                         </td>
                         {canAccess(["admin", "super_admin"]) && (
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 sticky right-0 z-10 bg-card border-l border-border">
                             <div className="flex items-center justify-center gap-1">
                               <Button
                                 variant="ghost"
